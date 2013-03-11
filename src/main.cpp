@@ -557,13 +557,41 @@
 #include <string>
 #include "Leap.h"
 
-//pi
+//The PI Number
 static const float MY_PI = 3.1415926536f;
 
-// Colors
+int tick = 0;
+
+//Colors
 GLfloat WHITE[] = {1, 1, 1};
 GLfloat RED[] = {1, 0, 0};
 GLfloat BLACK[] = {0, 0, 0};
+
+//Materials
+
+//Ruby
+GLfloat ruby_ambient[] = {0.174500, 0.011750, 0.011750, 0.550000};
+GLfloat ruby_diffuse[] = {0.614240, 0.041360, 0.041360, 0.550000};
+GLfloat ruby_specular[] = {0.727811, 0.626959, 0.626959, 0.550000};
+GLfloat ruby_shininess[] = {76.800003};
+
+//Emerald
+GLfloat emerald_ambient[] = {0.021500, 0.174500, 0.021500, 0.550000};
+GLfloat emerald_diffuse[] = {0.075680, 0.614240, 0.075680, 0.550000};
+GLfloat emerald_specular[] = {0.633000, 0.727811, 0.633000, 0.550000};
+GLfloat emerald_shininess[] = {76.800003};
+
+//Polished Silver
+GLfloat p_silv_ambient[] = {0.231250, 0.231250, 0.231250, 1.000000};
+GLfloat p_silv_diffuse[] = {0.277500, 0.277500, 0.277500, 1.000000};
+GLfloat p_silv_specular[] = {0.773911, 0.773911, 0.773911, 1.000000};
+GLfloat p_silv_shininess[] = {89.599998};
+
+//Black rubber
+GLfloat rubber_ambient[] = {0.000000, 0.000000, 0.000000, 1.000000};
+GLfloat rubber_diffuse[] = {0.010000, 0.010000, 0.010000, 1.000000};
+GLfloat rubber_specular[] = {0.500000, 0.500000, 0.500000, 1.000000};
+GLfloat rubber_shininess[] = {32.000000};
 
 void drawCircle(float radius, float thickness) {
   
@@ -583,8 +611,39 @@ void drawCircle(float radius, float thickness) {
   glEnd();
 }
 
+
+//half sphere by "Sumpfratte" found at
+//http://www.opengl.org/discussion_boards/showthread.php/159402-half-sphere
+//scalex - scaling of sphere around x-axis
+//scaley - scaling of sphere around y-axis
+//r - radius of sphere
+void drawHalfSphere(int scaley, int scalex, GLfloat r) {
+  int i, j;
+  GLfloat v[scalex*scaley][3];
+  
+  for (i=0; i<scalex; ++i) {
+    for (j=0; j<scaley; ++j) {
+      v[i*scaley+j][0]=r*cos(j*2*M_PI/scaley)*cos(i*M_PI/(2*scalex));
+      v[i*scaley+j][1]=r*sin(i*M_PI/(2*scalex));
+      v[i*scaley+j][2]=r*sin(j*2*M_PI/scaley)*cos(i*M_PI/(2*scalex));
+    }
+  }
+  
+  glBegin(GL_QUADS);
+  for (i=0; i<scalex-1; ++i) {
+    for (j=0; j<scaley; ++j) {
+      glVertex3fv(v[i*scaley+j]);
+      glVertex3fv(v[i*scaley+(j+1)%scaley]);
+      glVertex3fv(v[(i+1)*scaley+(j+1)%scaley]);
+      glVertex3fv(v[(i+1)*scaley+j]);
+    }
+  }
+  glEnd();
+}
+
+
 class Camera {
-  double theta;      
+  double theta;
   double y;          
   double dTheta;     
   double dy;         
@@ -599,59 +658,129 @@ public:
   void moveDown() {if (y > dy) y -= dy;}
 };
 
+class Environment {
+  int groundList;
+  int width;
+  int depth;
+  bool light1;
+  bool light2;
+public:
+  Environment(int width, int depth): width(width), depth(depth), light1(true), light2(true) {}
+  double centerx() {return width / 2;}
+  double centerz() {return depth / 2;}
+  void toggleLight1() {light1 = !light1;}
+  void toggleLight2() {light2 = !light2;}
+  void create() {
+    tick = 0;
+    groundList = glGenLists(1);
+    glNewList(groundList, GL_COMPILE);
+    
+    GLfloat light1Position[] = {4, 2, 2, 1};
+    glLightfv(GL_LIGHT0, GL_POSITION, light1Position);
+    
+    GLfloat light2Position[] = {0, 0, 0, 1};
+    glLightfv(GL_LIGHT1, GL_POSITION, light2Position);
+    
+    glBegin(GL_QUADS);
+    glNormal3d(0, 1, 0);
+    
+    glMaterialfv(GL_FRONT, GL_AMBIENT, emerald_ambient);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, emerald_diffuse);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, emerald_specular);
+    glMaterialfv(GL_FRONT, GL_SHININESS, emerald_shininess);
+    
+    glVertex3d(0, 0, 0);
+    glVertex3d(width, 0, 0);
+    glVertex3d(width, 0, depth);
+    glVertex3d(0, 0, depth);
+
+    glEnd();
+    glEndList();
+  }
+  void draw() {
+    if (light1)
+      glEnable(GL_LIGHT0);
+    else
+      glDisable(GL_LIGHT0);
+    if (light2)
+      glEnable(GL_LIGHT1);
+    else
+      glDisable(GL_LIGHT1);
+    glCallList(groundList);
+  }
+};
+
 class PokeBall {
   double radius;
   double maximumHeight;
   double x;
   double y;
   double z;
+  double a;
   int direction;
 public:
   PokeBall(double r, double h, double x, double z):
-  radius(r), maximumHeight(h), x(x), y(h), z(z), direction(-1) {
+  radius(r), maximumHeight(h), x(x), y(h), z(z), a(0), direction(-1) {
   }
   void update() {
-    y += direction * 0.05;
+    y += direction * 0.15;
+//    z += direction * 0.1;
+    a += 0.5;
     if (y > maximumHeight) {
       y = maximumHeight; direction = -1;
     } else if (y < radius) {
       y = radius; direction = 1;
     }
-//    glPushMatrix();
-//    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, color);
-//    glTranslated(x, y, z);
-//    glutSolidSphere(radius, 30, 30);
-//    glPopMatrix();
     
     glPushMatrix();
-
+    
     glTranslatef(x, y, z);
-
+    
+    glRotatef((int(a)%360), 1, 0, 0);
+    
     //top red part
-//    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, RED);
-    GLfloat ambient[] = {0.174500, 0.011750, 0.011750, 0.550000};
-    GLfloat diffuse[] = {0.614240, 0.041360, 0.041360, 0.550000};
-    GLfloat specular[] = {0.727811, 0.626959, 0.626959, 0.550000};
-    GLfloat shininess[] = {76.800003};
-    glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
-    glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
-    glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
+    glMaterialfv(GL_FRONT, GL_AMBIENT, ruby_ambient);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, ruby_diffuse);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, ruby_specular);
+    glMaterialfv(GL_FRONT, GL_SHININESS, ruby_shininess);
     glColor3ub(255, 0, 0);
-    glutSolidSphere(radius, 100, 100);
+    
+    glPushMatrix();
+    float angle = abs(((int(a*2)%90)-45));
+    float a2rad = MY_PI/180.0;
+    float move_up = (radius*sin(angle*a2rad))/sin(90*a2rad);
+    float move_back = move_up * 0.7;//(move_up/sin((90-angle)*a2rad))*sin(angle*a2rad);
+    glTranslatef(0, move_up, -move_back);
+    glRotatef(-angle, 1, 0, 0);
+    
+    drawHalfSphere(20, 20, radius);
+    glPopMatrix();
     
     //bottom white part
-    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, WHITE);
-    glTranslatef(0, -0.1, 0);
+    glMaterialfv(GL_FRONT, GL_AMBIENT, p_silv_ambient);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, p_silv_diffuse);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, p_silv_specular);
+    glMaterialfv(GL_FRONT, GL_SHININESS, p_silv_shininess);
+    glTranslatef(0, 0.0, 0);
+    glRotatef(180, 1, 0, 0);
     glColor3ub(255, 255, 255);
-    glutSolidSphere(radius, 100, 100);
+    
+    drawHalfSphere(20, 20, radius);
+    glRotatef(-180, 1, 0, 0);
     
     //black dot
-    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, BLACK);
-    glTranslatef(0, 0.1, radius);
+    glMaterialfv(GL_FRONT, GL_AMBIENT, rubber_ambient);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, rubber_diffuse);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, rubber_specular);
+    glMaterialfv(GL_FRONT, GL_SHININESS, rubber_shininess);
+    glTranslatef(0, 0.0, radius
+                 );
+    glRotatef(90, 1, 0, 0);
     glColor3ub(0, 0, 0);
-    glutSolidSphere(radius/10.0, 100, 100);
-
+//    glutSolidSphere(radius/5.0, 100, 100);
+    drawHalfSphere(20, 20, radius/5.0);
+    glRotatef(-90, 1, 0, 0);
+    
     //black ring
     glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, BLACK);
     glTranslatef(0, 0, -radius);
@@ -660,44 +789,6 @@ public:
     drawCircle(radius + 0.01,radius/10.0);
     
     glPopMatrix();
-  }
-};
-
-class Environment {
-  int groundList;
-  int width;
-  int depth;
-public:
-  Environment(int width, int depth): width(width), depth(depth) {}
-  double centerx() {return width / 2;}
-  double centerz() {return depth / 2;}
-  void create() {
-    groundList = glGenLists(1);
-    glNewList(groundList, GL_COMPILE);
-    
-    GLfloat light1Position[] = {4, 3, 7, 1};
-    glLightfv(GL_LIGHT0, GL_POSITION, light1Position);
-    
-    GLfloat light2Position[] = {0, 0, 0, 1};
-    glLightfv(GL_LIGHT1, GL_POSITION, light2Position);
-    
-    glBegin(GL_QUADS);
-    glNormal3d(0, 1, 0);
-    for (int x = 0; x < width - 1; x++) {
-      for (int z = 0; z < depth - 1; z++) {
-        glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE,
-                     (x + z) % 2 == 0 ? RED : WHITE);
-        glVertex3d(x, 0, z);
-        glVertex3d(x+1, 0, z);
-        glVertex3d(x+1, 0, z+1);
-        glVertex3d(x, 0, z+1);
-      }
-    }
-    glEnd();
-    glEndList();
-  }
-  void draw() {
-    glCallList(groundList);
   }
 };
 
@@ -711,12 +802,17 @@ PokeBall balls[] = {
 
 void init() {
   glEnable(GL_DEPTH_TEST);
+  glLightfv(GL_LIGHT0, GL_AMBIENT, WHITE);
   glLightfv(GL_LIGHT0, GL_DIFFUSE, WHITE);
   glLightfv(GL_LIGHT0, GL_SPECULAR, WHITE);
+  
+  glLightfv(GL_LIGHT1, GL_AMBIENT, RED);
   glLightfv(GL_LIGHT1, GL_DIFFUSE, RED);
   glLightfv(GL_LIGHT1, GL_SPECULAR, RED);
+  
   glMaterialfv(GL_FRONT, GL_SPECULAR, WHITE);
   glMaterialf(GL_FRONT, GL_SHININESS, 30);
+  
   glEnable(GL_LIGHTING);
   glEnable(GL_LIGHT0);
   glEnable(GL_LIGHT1);
@@ -744,11 +840,12 @@ void reshape(GLint w, GLint h) {
   glViewport(0, 0, w, h);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  gluPerspective(40.0, GLfloat(w) / GLfloat(h), 1.0, 150.0);
+  gluPerspective(40.0, GLfloat(w) / GLfloat(h), 1.0, 500.0);
   glMatrixMode(GL_MODELVIEW);
 }
 
 void timer(int v) {
+  tick++;
   glutPostRedisplay();
   glutTimerFunc(1000/60, timer, v);
 }
@@ -762,6 +859,16 @@ void special(int key, int, int) {
   }
   glutPostRedisplay();
 }
+void keyboardFunc (unsigned char key, int x, int y) {
+  switch (key) {
+    case '1':
+      area.toggleLight1();
+      break;
+    case '2':
+      area.toggleLight2();
+      break;
+  }
+}
 
 int main(int argc, char** argv) {
   glutInit(&argc, argv);
@@ -772,6 +879,7 @@ int main(int argc, char** argv) {
   glutDisplayFunc(display);
   glutReshapeFunc(reshape);
   glutSpecialFunc(special);
+  glutKeyboardFunc(keyboardFunc);
   glutTimerFunc(100, timer, 0);
   init();
   glutMainLoop();
