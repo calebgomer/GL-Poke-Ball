@@ -540,14 +540,15 @@
 //}
 
 
-#ifdef __APPLE_CC__
+/*#ifdef __APPLE_CC__
 #include <GLUT/glut.h>
 #else
 #include <GL/glut.h>
-#endif
+#endif*/
 #include <cmath>
 #include <stdlib.h>
 #include <stdio.h>
+#include <GL/glut.h>
 #include <stdarg.h>
 #include <iostream>
 #include <sstream>
@@ -555,9 +556,9 @@
 #include <map>
 #include <utility>
 #include <string>
-#include "Leap.h"
-
-using namespace Leap;
+//#include "Leap.h"
+/*
+//using namespace Leap;
 
 // Create a sample listener and controller
 class PokeListener : public Listener {
@@ -570,12 +571,12 @@ public:
 };
 PokeListener listener;
 Controller controller;
-
+*/
 using namespace std;
 
 //The PI Number
 static const float MY_PI = 3.1415926536f;
-
+static const float M_PI = 3.1415926536f;
 int tick = 0;
 
 //Colors
@@ -635,7 +636,8 @@ void drawCircle(float radius, float thickness) {
 //r - radius of sphere
 void drawHalfSphere(int scaley, int scalex, GLfloat r) {
   int i, j;
-  GLfloat v[scalex*scaley][3];
+  const int something=scalex*scaley;
+  GLfloat v[400][3];
   
   for (i=0; i<scalex; ++i) {
     for (j=0; j<scaley; ++j) {
@@ -724,6 +726,97 @@ public:
       glDisable(GL_LIGHT1);
     glCallList(groundList);
   }
+};
+
+class SwingSet{
+	double x, y, z;
+	int swingDirection;
+	GLUquadric* qobj;
+public:
+	SwingSet(double x, double y, double z):
+	x(x), y(y), z(z), swingDirection(-1){
+		qobj = gluNewQuadric();
+		gluQuadricNormals(qobj, GLU_SMOOTH);
+	}
+	void update() {
+	
+	glPushMatrix();
+	//swingsetframe
+	GLfloat ambient[] = {0.250000, 0.250000, 0.250000, 1.000000};
+    GLfloat diffuse[] = {0.400000, 0.400000, 0.400000, 1.000000};
+    GLfloat specular[] = {0.774597, 0.774597, 0.774597, 1.000000};
+    GLfloat shininess[] = {76.800003};
+    glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
+    glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
+
+	glTranslatef(0.1,0,1);
+
+	glPushMatrix();
+	glRotatef(-60,1,0,0);	
+	gluCylinder(qobj, .1,.1, 5, 100, 100);
+	glPopMatrix();
+
+	glPushMatrix();
+	glTranslatef(0,0,5);
+	glRotatef(-120,1,0,0);
+	gluCylinder(qobj, .1,.1, 5, 100, 100);
+	glPopMatrix();
+	
+	glTranslatef(6,0,0);
+
+	glPushMatrix();
+	glRotatef(-60,1,0,0);	
+	gluCylinder(qobj, .1,.1, 5, 100, 100);
+	glPopMatrix();
+
+	glPushMatrix();
+	glTranslatef(0,0,5);
+	glRotatef(-120,1,0,0);
+	gluCylinder(qobj, .1,.1, 5, 100, 100);
+	glPopMatrix();
+	glPopMatrix();
+
+	//top bar
+	glPushMatrix();
+	glTranslatef(0.1,4.33,3.5);
+	glRotatef(90,0,1,0);
+	gluCylinder(qobj, .1,.1, 6, 100, 100);
+	glPopMatrix();
+
+	//swing rope
+	GLfloat ambient2[] = {.2, .2, .2, 1};
+    GLfloat diffuse2[] = {.1, .1, .1, 1};
+    GLfloat specular2[] = {156.0/256.0,111.0/256.0,12.0/256.0, 1};
+    GLfloat shininess2[] = {6.8};
+    glMaterialfv(GL_FRONT, GL_AMBIENT, ambient2);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse2);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, specular2);
+    glMaterialfv(GL_FRONT, GL_SHININESS, shininess2);
+
+	glPushMatrix();
+	glTranslatef(3,4.33,3.5);
+	glRotatef(90,1,0,0);
+	gluCylinder(qobj, .1,.1, 2, 100, 100);
+	glPopMatrix();
+
+	//tire
+	GLfloat ambient3[] = {0.020000, 0.020000, 0.020000, 1.000000};
+	GLfloat diffuse3[] = {0.010000, 0.010000, 0.010000, 1.000000};
+    GLfloat specular3[] = {0.400000, 0.400000, 0.400000, 1.000000};
+    GLfloat shininess3[] = {10.000000};
+    glMaterialfv(GL_FRONT, GL_AMBIENT, ambient3);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse3);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, specular3);
+    glMaterialfv(GL_FRONT, GL_SHININESS, shininess3);
+
+	glPushMatrix();
+	glTranslatef(3,1.33,3.5);
+	glRotatef(90,0,1,0);
+	glutSolidTorus(.5,.75,16,16);
+	glPopMatrix();
+	}
 };
 
 class PokeBall {
@@ -847,8 +940,12 @@ PokeBall balls[] = {
   PokeBall(1.5, 6, 3, 4),
   PokeBall(0.4, 5, 1, 7)
 };
+SwingSet playground(1,1,1);
+GLUquadric* qobj;
 
 void init() {
+  qobj = gluNewQuadric();
+  gluQuadricNormals(qobj, GLU_SMOOTH);
   glEnable(GL_DEPTH_TEST);
   glLightfv(GL_LIGHT0, GL_AMBIENT, WHITE);
   glLightfv(GL_LIGHT0, GL_DIFFUSE, WHITE);
@@ -866,7 +963,7 @@ void init() {
   glEnable(GL_LIGHT1);
   area.create();
 }
-
+/**
 void printLeapInfo() {
   return;
   // Get the most recent frame and report some basic information
@@ -930,7 +1027,7 @@ void printLeapInfo() {
     << "yaw: " << direction.yaw() * RAD_TO_DEG << " degrees" << std::endl << std::endl;
   }
 }
-
+*/
 void display() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glLoadIdentity();
@@ -944,7 +1041,9 @@ void display() {
   for (int i = 0; i < sizeof balls / sizeof(PokeBall); i++) {
     balls[i].update();
   }
-  printLeapInfo();
+
+  playground.update();
+ // printLeapInfo();
   glFlush();
   glutSwapBuffers();
 }
@@ -1039,7 +1138,7 @@ void keyboardFunc (unsigned char key, int x, int y) {
       break;
   }
 }
-
+/**
 using namespace Leap;
 
 void PokeListener::onInit(const Controller& controller) {
@@ -1062,7 +1161,7 @@ void PokeListener::onFrame(const Controller& controller) {
   //nothing
   return;
 }
-
+*/
 int main(int argc, char** argv) {
 
   //set up the leap pokelistener
