@@ -540,15 +540,15 @@
 //}
 
 
-/*#ifdef __APPLE_CC__
+#ifdef __APPLE_CC__
 #include <GLUT/glut.h>
 #else
 #include <GL/glut.h>
-#endif*/
+#endif
 #include <cmath>
 #include <stdlib.h>
 #include <stdio.h>
-#include <GL/glut.h>
+//#include <GL/glut.h>
 #include <stdarg.h>
 #include <iostream>
 #include <sstream>
@@ -576,7 +576,6 @@ using namespace std;
 
 //The PI Number
 static const float MY_PI = 3.1415926536f;
-static const float M_PI = 3.1415926536f;
 int tick = 0;
 
 //Colors
@@ -636,14 +635,13 @@ void drawCircle(float radius, float thickness) {
 //r - radius of sphere
 void drawHalfSphere(int scaley, int scalex, GLfloat r) {
   int i, j;
-  const int something=scalex*scaley;
   GLfloat v[400][3];
   
   for (i=0; i<scalex; ++i) {
     for (j=0; j<scaley; ++j) {
-      v[i*scaley+j][0]=r*cos(j*2*M_PI/scaley)*cos(i*M_PI/(2*scalex));
-      v[i*scaley+j][1]=r*sin(i*M_PI/(2*scalex));
-      v[i*scaley+j][2]=r*sin(j*2*M_PI/scaley)*cos(i*M_PI/(2*scalex));
+      v[i*scaley+j][0]=r*cos(j*2*MY_PI/scaley)*cos(i*MY_PI/(2*scalex));
+      v[i*scaley+j][1]=r*sin(i*MY_PI/(2*scalex));
+      v[i*scaley+j][2]=r*sin(j*2*MY_PI/scaley)*cos(i*MY_PI/(2*scalex));
     }
   }
   
@@ -734,10 +732,13 @@ class SwingSet{
 	GLUquadric* qobj;
 public:
 	SwingSet(double x, double y, double z):
-	x(x), y(y), z(z), swingDirection(-1){
-		qobj = gluNewQuadric();
+	x(x), y(y), z(z), swingDirection(-1) {}
+  
+  void create() {
+    qobj = gluNewQuadric();
 		gluQuadricNormals(qobj, GLU_SMOOTH);
-	}
+  }
+  
 	void update() {
 	
 	glPushMatrix();
@@ -918,7 +919,6 @@ public:
                  );
     glRotatef(90, 1, 0, 0);
     glColor3ub(0, 0, 0);
-//    glutSolidSphere(radius/5.0, 100, 100);
     drawHalfSphere(20, 20, radius/5.0);
     glRotatef(-90, 1, 0, 0);
     
@@ -962,6 +962,7 @@ void init() {
   glEnable(GL_LIGHT0);
   glEnable(GL_LIGHT1);
   area.create();
+  playground.create();
 }
 /**
 void printLeapInfo() {
