@@ -23,20 +23,20 @@
 #include <string>
 //#include "Leap.h"
 /*
-//using namespace Leap;
-
-// Create a sample listener and controller
-class PokeListener : public Listener {
-public:
-  virtual void onInit(const Controller&);
-  virtual void onConnect(const Controller&);
-  virtual void onDisconnect(const Controller&);
-  virtual void onExit(const Controller&);
-  virtual void onFrame(const Controller&);
-};
-PokeListener listener;
-Controller controller;
-*/
+ //using namespace Leap;
+ 
+ // Create a sample listener and controller
+ class PokeListener : public Listener {
+ public:
+ virtual void onInit(const Controller&);
+ virtual void onConnect(const Controller&);
+ virtual void onDisconnect(const Controller&);
+ virtual void onExit(const Controller&);
+ virtual void onFrame(const Controller&);
+ };
+ PokeListener listener;
+ Controller controller;
+ */
 using namespace std;
 
 //The PI Number
@@ -125,9 +125,9 @@ void drawHalfSphere(int scaley, int scalex, GLfloat r) {
 
 class Camera {
   double theta;
-  double y;          
-  double dTheta;     
-  double dy;         
+  double y;
+  double dTheta;
+  double dy;
 public:
   Camera(): theta(0), y(3), dTheta(0.04), dy(0.2) {}
   double getX() {return 10 * cos(theta);}
@@ -174,7 +174,7 @@ public:
     glVertex3d(width, 0, 0);
     glVertex3d(width, 0, depth);
     glVertex3d(0, 0, depth);
-
+    
     glEnd();
     glEndList();
   }
@@ -195,20 +195,56 @@ class SwingSet{
 	double x, y, z;
 	int swingDirection;
 	GLUquadric* qobj;
+  double rotx;
+  double roty;
+  double rotz;
+  double speed;
+  int direction;
+  bool moving;
 public:
 	SwingSet(double x, double y, double z):
-	x(x), y(y), z(z), swingDirection(-1) {}
+	x(x), y(y), z(z), swingDirection(-1),
+  rotx(0), roty(0), rotz(0),
+  speed(1), direction(-1), moving(true) {}
   
   void create() {
     qobj = gluNewQuadric();
-		gluQuadricNormals(qobj, GLU_SMOOTH);
+    gluQuadricNormals(qobj, GLU_SMOOTH);
   }
   
-	void update() {
-	
-	glPushMatrix();
-	//swingsetframe
-	GLfloat ambient[] = {0.250000, 0.250000, 0.250000, 1.000000};
+  void moveBack() {z-=speed;};
+  void moveForward() {z+=speed;};
+  void moveLeft() {x-=speed;};
+  void moveRight() {x+=speed;};
+  void moveDown(){y-=speed;};
+  void moveUp() {y+=speed;};
+  
+  void rotateXPos() {rotx+=speed*5;};
+  void rotateXNeg() {rotx-=speed*5;};
+  void rotateYPos() {roty+=speed*5;};
+  void rotateYNeg() {roty-=speed*5;};
+  void rotateZPos() {rotz+=speed*5;};
+  void rotateZNeg() {rotz-=speed*5;};
+  
+  void speedUp() {speed*=1.1;};
+  void slowDown() {speed*=0.9;};
+  
+  void toggleMoving() {moving=!moving;};
+  void autoMove() {moving=true;};
+  void manualMove() {moving=false;};
+  
+  
+  void update() {
+    
+    glPushMatrix();
+    glTranslatef(x, y, z);
+    glRotatef(rotx, 1, 0, 0);
+    glRotatef(roty, 0, 1, 0);
+    glRotatef(rotz, 0, 0, 1);
+    
+    glPushMatrix();
+    //swingsetframe
+    GLfloat ambient[] = {0.250000, 0.250000, 0.250000, 1.000000};
     GLfloat diffuse[] = {0.400000, 0.400000, 0.400000, 1.000000};
     GLfloat specular[] = {0.774597, 0.774597, 0.774597, 1.000000};
     GLfloat shininess[] = {76.800003};
@@ -216,43 +252,43 @@ public:
     glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
     glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
     glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
-
-	glTranslatef(0.1,0,1);
-
-	glPushMatrix();
-	glRotatef(-60,1,0,0);	
-	gluCylinder(qobj, .1,.1, 5, 100, 100);
-	glPopMatrix();
-
-	glPushMatrix();
-	glTranslatef(0,0,5);
-	glRotatef(-120,1,0,0);
-	gluCylinder(qobj, .1,.1, 5, 100, 100);
-	glPopMatrix();
-	
-	glTranslatef(6,0,0);
-
-	glPushMatrix();
-	glRotatef(-60,1,0,0);	
-	gluCylinder(qobj, .1,.1, 5, 100, 100);
-	glPopMatrix();
-
-	glPushMatrix();
-	glTranslatef(0,0,5);
-	glRotatef(-120,1,0,0);
-	gluCylinder(qobj, .1,.1, 5, 100, 100);
-	glPopMatrix();
-	glPopMatrix();
-
-	//top bar
-	glPushMatrix();
-	glTranslatef(0.1,4.33,3.5);
-	glRotatef(90,0,1,0);
-	gluCylinder(qobj, .1,.1, 6, 100, 100);
-	glPopMatrix();
-
-	//swing rope
-	GLfloat ambient2[] = {.2, .2, .2, 1};
+    
+    glTranslatef(0.1,0,1);
+    
+    glPushMatrix();
+    glRotatef(-60,1,0,0);
+    gluCylinder(qobj, .1,.1, 5, 100, 100);
+    glPopMatrix();
+    
+    glPushMatrix();
+    glTranslatef(0,0,5);
+    glRotatef(-120,1,0,0);
+    gluCylinder(qobj, .1,.1, 5, 100, 100);
+    glPopMatrix();
+    
+    glTranslatef(6,0,0);
+    
+    glPushMatrix();
+    glRotatef(-60,1,0,0);
+    gluCylinder(qobj, .1,.1, 5, 100, 100);
+    glPopMatrix();
+    
+    glPushMatrix();
+    glTranslatef(0,0,5);
+    glRotatef(-120,1,0,0);
+    gluCylinder(qobj, .1,.1, 5, 100, 100);
+    glPopMatrix();
+    glPopMatrix();
+    
+    //top bar
+    glPushMatrix();
+    glTranslatef(0.1,4.33,3.5);
+    glRotatef(90,0,1,0);
+    gluCylinder(qobj, .1,.1, 6, 100, 100);
+    glPopMatrix();
+    
+    //swing rope
+    GLfloat ambient2[] = {.2, .2, .2, 1};
     GLfloat diffuse2[] = {.1, .1, .1, 1};
     GLfloat specular2[] = {156.0/256.0,111.0/256.0,12.0/256.0, 1};
     GLfloat shininess2[] = {6.8};
@@ -260,29 +296,31 @@ public:
     glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse2);
     glMaterialfv(GL_FRONT, GL_SPECULAR, specular2);
     glMaterialfv(GL_FRONT, GL_SHININESS, shininess2);
-
-	glPushMatrix();
-	glTranslatef(3,4.33,3.5);
-	glRotatef(90,1,0,0);
-	gluCylinder(qobj, .1,.1, 2, 100, 100);
-	glPopMatrix();
-
-	//tire
-	GLfloat ambient3[] = {0.020000, 0.020000, 0.020000, 1.000000};
-	GLfloat diffuse3[] = {0.010000, 0.010000, 0.010000, 1.000000};
+    
+    glPushMatrix();
+    glTranslatef(3,4.33,3.5);
+    glRotatef(90,1,0,0);
+    gluCylinder(qobj, .1,.1, 2, 100, 100);
+    glPopMatrix();
+    
+    //tire
+    GLfloat ambient3[] = {0.020000, 0.020000, 0.020000, 1.000000};
+    GLfloat diffuse3[] = {0.010000, 0.010000, 0.010000, 1.000000};
     GLfloat specular3[] = {0.400000, 0.400000, 0.400000, 1.000000};
     GLfloat shininess3[] = {10.000000};
     glMaterialfv(GL_FRONT, GL_AMBIENT, ambient3);
     glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse3);
     glMaterialfv(GL_FRONT, GL_SPECULAR, specular3);
     glMaterialfv(GL_FRONT, GL_SHININESS, shininess3);
-
-	glPushMatrix();
-	glTranslatef(3,1.33,3.5);
-	glRotatef(90,0,1,0);
-	glutSolidTorus(.5,.75,16,16);
-	glPopMatrix();
-	}
+    
+    glPushMatrix();
+    glTranslatef(3,1.33,3.5);
+    glRotatef(90,0,1,0);
+    glutSolidTorus(.5,.75,16,16);
+    glPopMatrix();
+    
+    glPopMatrix();
+  }
 };
 
 class PokeBall {
@@ -328,7 +366,7 @@ public:
   
   void update() {
     if (moving) {
-      y += direction * 0.15;
+      y += direction * 0.1;
       a += 0.5;
       rotx += 0.5;
       if (y > maximumHeight) {
@@ -401,9 +439,9 @@ public:
 Environment area(8, 8);
 Camera camera;
 PokeBall balls[] = {
-  PokeBall(1, 7, 6, 1),
-  PokeBall(1.5, 6, 3, 4),
-  PokeBall(0.4, 5, 1, 7)
+  PokeBall(1, 10, 6, 1),
+  PokeBall(1.5, 10, 3, 4),
+  PokeBall(0.4, 10, 1, 7)
 };
 SwingSet playground(1,1,1);
 GLUquadric* qobj;
@@ -430,76 +468,76 @@ void init() {
   playground.create();
 }
 /**
-void printLeapInfo() {
-  return;
-  // Get the most recent frame and report some basic information
-  const Frame frame = controller.frame();
-  
-  std::stringstream out_stream;
-  
-  std::cout << "Frame id: " << frame.id()
-  << ", timestamp: " << frame.timestamp()
-  << ", hands: " << frame.hands().count()
-  << ", fingers: " << frame.fingers().count()
-  << ", tools: " << frame.tools().count() << std::endl;
-  
-  if (!frame.hands().empty()) {
-    // Get the first hand
-    const Hand hand = frame.hands()[0];
-    
-    // Get the hand's normal vector and direction
-    const Vector normal = hand.palmNormal();
-    const Vector direction = hand.direction();
-    
-    // Check if the hand has any fingers
-    const FingerList fingers = hand.fingers();
-    if (!fingers.empty()) {
-      // Calculate the hand's average finger tip position
-      Vector avgPos;
-      for (int i = 0; i < fingers.count(); ++i) {
-        avgPos += fingers[i].tipPosition();
-      }
-      avgPos /= (float)fingers.count();
-      std::cout << "Hand has " << fingers.count()
-      << " fingers, average finger tip position" << avgPos << std::endl;
-      
-      // Calculate the hand's pitch, roll, and yaw angles
-      std::cout << "Hand pitch: " << direction.pitch() * RAD_TO_DEG << " degrees, "
-      << "roll: " << normal.roll() * RAD_TO_DEG << " degrees, "
-      << "yaw: " << direction.yaw() * RAD_TO_DEG << " degrees" << std::endl << std::endl;
-      
-      glPushMatrix();
-      glRotatef(direction.pitch()*RAD_TO_DEG, 1, 0, 0);
-      glRotatef(direction.yaw()*RAD_TO_DEG, 0, 1, 0);
-      glRotatef(normal.roll()*RAD_TO_DEG, 0, 0, 1);
-      glTranslatef(avgPos.x/5, avgPos.y/10, avgPos.z/5);
-      PokeBall ball = PokeBall(1, 1, 1, 1);
-      ball.update();
-      glScalef(1, 1, 1);
-      glPopMatrix();
-    }
-    
-    // Get the hand's sphere radius and palm position
-    std::cout << "Hand sphere radius: " << hand.sphereRadius()
-    << " mm, palm position: " << hand.palmPosition() << std::endl;
-    
-    //    // Get the hand's normal vector and direction
-    //    const Vector normal = hand.palmNormal();
-    //    const Vector direction = hand.direction();
-    
-    // Calculate the hand's pitch, roll, and yaw angles
-    std::cout << "Hand pitch: " << direction.pitch() * RAD_TO_DEG << " degrees, "
-    << "roll: " << normal.roll() * RAD_TO_DEG << " degrees, "
-    << "yaw: " << direction.yaw() * RAD_TO_DEG << " degrees" << std::endl << std::endl;
-  }
-}
-*/
+ void printLeapInfo() {
+ return;
+ // Get the most recent frame and report some basic information
+ const Frame frame = controller.frame();
+ 
+ std::stringstream out_stream;
+ 
+ std::cout << "Frame id: " << frame.id()
+ << ", timestamp: " << frame.timestamp()
+ << ", hands: " << frame.hands().count()
+ << ", fingers: " << frame.fingers().count()
+ << ", tools: " << frame.tools().count() << std::endl;
+ 
+ if (!frame.hands().empty()) {
+ // Get the first hand
+ const Hand hand = frame.hands()[0];
+ 
+ // Get the hand's normal vector and direction
+ const Vector normal = hand.palmNormal();
+ const Vector direction = hand.direction();
+ 
+ // Check if the hand has any fingers
+ const FingerList fingers = hand.fingers();
+ if (!fingers.empty()) {
+ // Calculate the hand's average finger tip position
+ Vector avgPos;
+ for (int i = 0; i < fingers.count(); ++i) {
+ avgPos += fingers[i].tipPosition();
+ }
+ avgPos /= (float)fingers.count();
+ std::cout << "Hand has " << fingers.count()
+ << " fingers, average finger tip position" << avgPos << std::endl;
+ 
+ // Calculate the hand's pitch, roll, and yaw angles
+ std::cout << "Hand pitch: " << direction.pitch() * RAD_TO_DEG << " degrees, "
+ << "roll: " << normal.roll() * RAD_TO_DEG << " degrees, "
+ << "yaw: " << direction.yaw() * RAD_TO_DEG << " degrees" << std::endl << std::endl;
+ 
+ glPushMatrix();
+ glRotatef(direction.pitch()*RAD_TO_DEG, 1, 0, 0);
+ glRotatef(direction.yaw()*RAD_TO_DEG, 0, 1, 0);
+ glRotatef(normal.roll()*RAD_TO_DEG, 0, 0, 1);
+ glTranslatef(avgPos.x/5, avgPos.y/10, avgPos.z/5);
+ PokeBall ball = PokeBall(1, 1, 1, 1);
+ ball.update();
+ glScalef(1, 1, 1);
+ glPopMatrix();
+ }
+ 
+ // Get the hand's sphere radius and palm position
+ std::cout << "Hand sphere radius: " << hand.sphereRadius()
+ << " mm, palm position: " << hand.palmPosition() << std::endl;
+ 
+ //    // Get the hand's normal vector and direction
+ //    const Vector normal = hand.palmNormal();
+ //    const Vector direction = hand.direction();
+ 
+ // Calculate the hand's pitch, roll, and yaw angles
+ std::cout << "Hand pitch: " << direction.pitch() * RAD_TO_DEG << " degrees, "
+ << "roll: " << normal.roll() * RAD_TO_DEG << " degrees, "
+ << "yaw: " << direction.yaw() * RAD_TO_DEG << " degrees" << std::endl << std::endl;
+ }
+ }
+ */
 void display() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glLoadIdentity();
-//  gluLookAt(camera.getX(), camera.getY(), camera.getZ(),
-//            checkerboard.centerx(), 0.0, checkerboard.centerz(),
-//            0.0, 1.0, 0.0);
+  //  gluLookAt(camera.getX(), camera.getY(), camera.getZ(),
+  //            checkerboard.centerx(), 0.0, checkerboard.centerz(),
+  //            0.0, 1.0, 0.0);
   gluLookAt(4, 2, 15,
             4, 4, -5,
             0, 1, 0);
@@ -507,9 +545,9 @@ void display() {
   for (int i = 0; i < sizeof balls / sizeof(PokeBall); i++) {
     balls[i].update();
   }
-
+  
   playground.update();
- // printLeapInfo();
+  // printLeapInfo();
   glFlush();
   glutSwapBuffers();
 }
@@ -545,6 +583,7 @@ void keyboardFunc (unsigned char key, int x, int y) {
     case '2':
       area.toggleLight2();
       break;
+    //pokeball maneuvering
     case 'w':
       balls[0].manualMove();
       balls[0].moveUp();
@@ -602,34 +641,92 @@ void keyboardFunc (unsigned char key, int x, int y) {
     case ' ':
       balls[0].toggleMoving();
       break;
+    //swingset maneuvering
+    case 'u':
+      playground.manualMove();
+      playground.moveUp();
+      break;
+    case 'h':
+      playground.manualMove();
+      playground.moveLeft();
+      break;
+    case 'j':
+      playground.manualMove();
+      playground.moveDown();
+      break;
+    case 'k':
+      playground.manualMove();
+      playground.moveRight();
+      break;
+    case 'y':
+      playground.manualMove();
+      playground.moveBack();
+      break;
+    case 'i':
+      playground.manualMove();
+      playground.moveForward();
+      break;
+    case 'n':
+      playground.manualMove();
+      playground.rotateYNeg();
+      break;
+    case 'm':
+      playground.manualMove();
+      playground.rotateYPos();
+      break;
+    case ',':
+      playground.manualMove();
+      playground.rotateXNeg();
+      break;
+    case '.':
+      playground.manualMove();
+      playground.rotateXPos();
+      break;
+    case ';':
+      playground.manualMove();
+      playground.rotateZNeg();
+      break;
+    case '/':
+      playground.manualMove();
+      playground.rotateZPos();
+      break;
+    case 'o':
+      playground.speedUp();
+      break;
+    case 'l':
+      playground.slowDown();
+      break;
+    case '\n':
+      playground.toggleMoving();
+      break;
   }
 }
 /**
-using namespace Leap;
-
-void PokeListener::onInit(const Controller& controller) {
-  std::cout << "Initialized" << std::endl;
-}
-
-void PokeListener::onConnect(const Controller& controller) {
-  std::cout << "Connected" << std::endl;
-}
-
-void PokeListener::onDisconnect(const Controller& controller) {
-  std::cout << "Disconnected" << std::endl;
-}
-
-void PokeListener::onExit(const Controller& controller) {
-  std::cout << "Exited" << std::endl;
-}
-
-void PokeListener::onFrame(const Controller& controller) {
-  //nothing
-  return;
-}
-*/
+ using namespace Leap;
+ 
+ void PokeListener::onInit(const Controller& controller) {
+ std::cout << "Initialized" << std::endl;
+ }
+ 
+ void PokeListener::onConnect(const Controller& controller) {
+ std::cout << "Connected" << std::endl;
+ }
+ 
+ void PokeListener::onDisconnect(const Controller& controller) {
+ std::cout << "Disconnected" << std::endl;
+ }
+ 
+ void PokeListener::onExit(const Controller& controller) {
+ std::cout << "Exited" << std::endl;
+ }
+ 
+ void PokeListener::onFrame(const Controller& controller) {
+ //nothing
+ return;
+ }
+ */
 int main(int argc, char** argv) {
-
+  
   //set up the leap pokelistener
   //controller.addListener(listener);
   
