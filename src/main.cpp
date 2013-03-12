@@ -21,6 +21,7 @@ using namespace std;
 //The PI Number
 static const float MY_PI = 3.1415926536f;
 int tick = 0;
+int currentPokeBall = 0;
 
 //Colors
 GLfloat WHITE[] = {1, 1, 1};
@@ -511,63 +512,67 @@ void keyboardFunc (unsigned char key, int x, int y) {
     case '2':
       area.toggleLight2();
       break;
-    //pokeball maneuvering
+      
+      //pokeball maneuvering
     case 'w':
-      balls[0].manualMove();
       balls[0].moveUp();
+      balls[currentPokeBall].manualMove();
+      balls[currentPokeBall].moveUp();
       break;
     case 'a':
-      balls[0].manualMove();
       balls[0].moveLeft();
+      balls[currentPokeBall].moveLeft();
       break;
     case 's':
-      balls[0].manualMove();
-      balls[0].moveDown();
+      balls[currentPokeBall].manualMove();
+      balls[currentPokeBall].moveDown();
       break;
     case 'd':
-      balls[0].manualMove();
-      balls[0].moveRight();
+      balls[currentPokeBall].moveRight();
       break;
     case 'q':
-      balls[0].manualMove();
-      balls[0].moveBack();
+      balls[currentPokeBall].manualMove();
+      balls[currentPokeBall].moveBack();
       break;
     case 'e':
-      balls[0].manualMove();
-      balls[0].moveForward();
+      balls[currentPokeBall].manualMove();
+      balls[currentPokeBall].moveForward();
       break;
     case 'z':
-      balls[0].manualMove();
       balls[0].rotateYNeg();
+      balls[currentPokeBall].rotateYNeg();
       break;
     case 'x':
       balls[0].manualMove();
-      balls[0].rotateYPos();
       break;
     case 'c':
-      balls[0].manualMove();
-      balls[0].rotateXNeg();
+      balls[currentPokeBall].manualMove();
+      balls[currentPokeBall].rotateXNeg();
       break;
     case 'v':
       balls[0].manualMove();
       balls[0].rotateXPos();
+      balls[currentPokeBall].manualMove();
+      balls[currentPokeBall].rotateXPos();
       break;
     case 'g':
-      balls[0].manualMove();
-      balls[0].rotateZNeg();
+      balls[currentPokeBall].manualMove();
+      balls[currentPokeBall].rotateZNeg();
       break;
     case 'b':
-      balls[0].manualMove();
-      balls[0].rotateZPos();
       break;
     case 'r':
-      balls[0].speedUp();
       break;
     case 'f':
       balls[0].slowDown();
+      balls[currentPokeBall].slowDown();
       break;
     case ' ':
-      balls[0].toggleMoving();
+      break;
+    case '`':
+      currentPokeBall++;
+      if (currentPokeBall >= sizeof balls / sizeof(PokeBall))
+        currentPokeBall = 0;
       break;
     //swingset maneuvering
     case 'u':
