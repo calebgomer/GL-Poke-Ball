@@ -1,4 +1,4 @@
-/************************************
+/**************************************************
  * Erik Kremer and Caleb Gomer
  * Computer Graphics Project 2
  *
@@ -6,7 +6,12 @@
  *
  * This project is hosted on github
  * https://github.com/calebgomer/GL-Poke-Ball
- ***********************************/
+ **************************************************/
+
+/**************************************************
+ * Note: some inspirational ideas found here
+ * http://cs.lmu.edu/~ray/notes/openglexamples/
+ **************************************************/
 
 #include <cmath>
 #include <stdlib.h>
@@ -72,14 +77,17 @@ void drawCircle(float radius, float thickness) {
   glEnd();
 }
 
-
-//half sphere by "Sumpfratte" found at
-//http://www.opengl.org/discussion_boards/showthread.php/159402-half-sphere
-//scalex - scaling of sphere around x-axis
-//scaley - scaling of sphere around y-axis
-//r - radius of sphere
-void drawHalfSphere(int scaley, int scalex, GLfloat r) {
+/**************************************************
+ * half sphere by "Sumpfratte" found at
+ * http://www.opengl.org/discussion_boards/showthread.php/159402-half-sphere
+ * scalex - scaling of sphere around x-axis
+ * scaley - scaling of sphere around y-axis
+ * r - radius of sphere
+ **************************************************/
+void drawHalfSphere(GLfloat r) {
   int i, j;
+  int scaley = 20;
+  int scalex = 20;
   GLfloat v[400][3];
   
   for (i=0; i<scalex; ++i) {
@@ -127,8 +135,6 @@ class Environment {
   bool light2;
 public:
   Environment(int width, int depth): width(width), depth(depth), light1(true), light2(true) {}
-  double centerx() {return width / 2;}
-  double centerz() {return depth / 2;}
   void toggleLight1() {light1 = !light1;}
   void toggleLight2() {light2 = !light2;}
   void create() {
@@ -136,9 +142,11 @@ public:
     groundList = glGenLists(1);
     glNewList(groundList, GL_COMPILE);
     
-    GLfloat light1Position[] = {width, 10, centerz(), 1};
+    //white light to the top right
+    GLfloat light1Position[] = {width, 10, depth/2, 1};
     glLightfv(GL_LIGHT0, GL_POSITION, light1Position);
     
+    //red light at the origin
     GLfloat light2Position[] = {0, 0, 0, 1};
     glLightfv(GL_LIGHT1, GL_POSITION, light2Position);
     
@@ -173,18 +181,19 @@ public:
 
 class SwingSet{
 	double x, y, z;
-	int swingDirection;
 	GLUquadric* qobj;
   double rotx;
   double roty;
   double rotz, rotSwing, rotTire;
-  double speed, a;
+  double speed;
   int direction;
   bool moving;
 public:
 	SwingSet(double x, double y, double z):
-	x(x), y(y), z(z), swingDirection(-1),
-  rotx(0), roty(0), rotz(0), rotSwing(90), rotTire(0), speed(1), direction(-1), moving(true) {}
+	x(x), y(y), z(z),
+  rotx(0), roty(0), rotz(0),
+  rotSwing(90), rotTire(90),
+  speed(1), direction(-1), moving(true) {}
   
   void create() {
     qobj = gluNewQuadric();
@@ -227,87 +236,90 @@ public:
         rotSwing = 50; direction = 1;
       }
     }
-    glPushMatrix();
-    glTranslatef(x, y, z);
-    glRotatef(rotx, 1, 0, 0);
-    glRotatef(roty, 0, 1, 0);
-    glRotatef(rotz, 0, 0, 1);
     
     glPushMatrix();
-    //swingsetframe
-    GLfloat ambient[] = {0.250000, 0.250000, 0.250000, 1.000000};
-    GLfloat diffuse[] = {0.400000, 0.400000, 0.400000, 1.000000};
-    GLfloat specular[] = {0.774597, 0.774597, 0.774597, 1.000000};
-    GLfloat shininess[] = {76.800003};
-    glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
-    glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
-    glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
     
-    glTranslatef(0.1,0,1);
+      glTranslatef(x, y, z);
+      glRotatef(rotx, 1, 0, 0);
+      glRotatef(roty, 0, 1, 0);
+      glRotatef(rotz, 0, 0, 1);
+      
+      glPushMatrix();
+        //swingsetframe
+        GLfloat ambient[] = {0.250000, 0.250000, 0.250000, 1.000000};
+        GLfloat diffuse[] = {0.400000, 0.400000, 0.400000, 1.000000};
+        GLfloat specular[] = {0.774597, 0.774597, 0.774597, 1.000000};
+        GLfloat shininess[] = {76.800003};
+        glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
+        glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
+        glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
+        glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
+        
+        glTranslatef(0.1,0,1);
+        
+        glPushMatrix();
+          glRotatef(-60,1,0,0);
+          gluCylinder(qobj, .1,.1, 5, 100, 100);
+        glPopMatrix();
+        
+        glPushMatrix();
+          glTranslatef(0,0,5);
+          glRotatef(-120,1,0,0);
+          gluCylinder(qobj, .1,.1, 5, 100, 100);
+        glPopMatrix();
+        
+        glTranslatef(6,0,0);
+        
+        glPushMatrix();
+          glRotatef(-60,1,0,0);
+          gluCylinder(qobj, .1,.1, 5, 100, 100);
+        glPopMatrix();
+        
+        glPushMatrix();
+          glTranslatef(0,0,5);
+          glRotatef(-120,1,0,0);
+          gluCylinder(qobj, .1,.1, 5, 100, 100);
+        glPopMatrix();
+      glPopMatrix();
     
-    glPushMatrix();
-    glRotatef(-60,1,0,0);
-    gluCylinder(qobj, .1,.1, 5, 100, 100);
-    glPopMatrix();
+      //top bar
+      glPushMatrix();
+        glTranslatef(0.1,4.33,3.5);
+        glRotatef(90,0,1,0);
+        gluCylinder(qobj, .1,.1, 6, 100, 100);
+      glPopMatrix();
+      
+      //swing rope
+      GLfloat ambient2[] = {.2, .2, .2, 1};
+      GLfloat diffuse2[] = {.1, .1, .1, 1};
+      GLfloat specular2[] = {156.0/256.0,111.0/256.0,12.0/256.0, 1};
+      GLfloat shininess2[] = {6.8};
+      glMaterialfv(GL_FRONT, GL_AMBIENT, ambient2);
+      glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse2);
+      glMaterialfv(GL_FRONT, GL_SPECULAR, specular2);
+      glMaterialfv(GL_FRONT, GL_SHININESS, shininess2);
+      
+      glPushMatrix();
+        glTranslatef(3,4.33,3.5);
+        glRotatef(rotSwing,1,0,0);
+        gluCylinder(qobj, .1,.1, 2, 100, 100);
+        
+        //tire
+        GLfloat ambient3[] = {0.020000, 0.020000, 0.020000, 1.000000};
+        GLfloat diffuse3[] = {0.010000, 0.010000, 0.010000, 1.000000};
+        GLfloat specular3[] = {0.400000, 0.400000, 0.400000, 1.000000};
+        GLfloat shininess3[] = {10.000000};
+        glMaterialfv(GL_FRONT, GL_AMBIENT, ambient3);
+        glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse3);
+        glMaterialfv(GL_FRONT, GL_SPECULAR, specular3);
+        glMaterialfv(GL_FRONT, GL_SHININESS, shininess3);
+        
+        glTranslatef(0,0,3);
+        glRotatef(90,0,1,0);
+        glRotatef(rotTire, 1,0,0);
+        glutSolidTorus(.25,1,16,16);
     
-    glPushMatrix();
-    glTranslatef(0,0,5);
-    glRotatef(-120,1,0,0);
-    gluCylinder(qobj, .1,.1, 5, 100, 100);
-    glPopMatrix();
-    
-    glTranslatef(6,0,0);
-    
-    glPushMatrix();
-    glRotatef(-60,1,0,0);
-    gluCylinder(qobj, .1,.1, 5, 100, 100);
-    glPopMatrix();
-    
-    glPushMatrix();
-    glTranslatef(0,0,5);
-    glRotatef(-120,1,0,0);
-    gluCylinder(qobj, .1,.1, 5, 100, 100);
-    glPopMatrix();
-    glPopMatrix();
-    
-    //top bar
-    glPushMatrix();
-    glTranslatef(0.1,4.33,3.5);
-    glRotatef(90,0,1,0);
-    gluCylinder(qobj, .1,.1, 6, 100, 100);
-    glPopMatrix();
-    
-    //swing rope
-    GLfloat ambient2[] = {.2, .2, .2, 1};
-    GLfloat diffuse2[] = {.1, .1, .1, 1};
-    GLfloat specular2[] = {156.0/256.0,111.0/256.0,12.0/256.0, 1};
-    GLfloat shininess2[] = {6.8};
-    glMaterialfv(GL_FRONT, GL_AMBIENT, ambient2);
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse2);
-    glMaterialfv(GL_FRONT, GL_SPECULAR, specular2);
-    glMaterialfv(GL_FRONT, GL_SHININESS, shininess2);
-    
-    glPushMatrix();
-    glTranslatef(3,4.33,3.5);
-    glRotatef(rotSwing,1,0,0);
-    gluCylinder(qobj, .1,.1, 2, 100, 100);
-    
-    //tire
-    GLfloat ambient3[] = {0.020000, 0.020000, 0.020000, 1.000000};
-    GLfloat diffuse3[] = {0.010000, 0.010000, 0.010000, 1.000000};
-    GLfloat specular3[] = {0.400000, 0.400000, 0.400000, 1.000000};
-    GLfloat shininess3[] = {10.000000};
-    glMaterialfv(GL_FRONT, GL_AMBIENT, ambient3);
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse3);
-    glMaterialfv(GL_FRONT, GL_SPECULAR, specular3);
-    glMaterialfv(GL_FRONT, GL_SHININESS, shininess3);
-    
-    glTranslatef(0,0,3);
-    glRotatef(90,0,1,0);
-    glRotatef(rotTire, 1,0,0);
-    glutSolidTorus(.25,1,16,16);
-    glPopMatrix();
+      glPopMatrix();
     
     glPopMatrix();
   }
@@ -326,12 +338,18 @@ class PokeBall {
   double speed;
   int direction;
   bool moving;
+  GLUquadric* qobj;
 public:
   PokeBall(double r, double h, double x, double z):
   radius(r), maximumHeight(h),
   x(x), y(h), z(z), a(0),
   rotx(0), roty(0), rotz(0),
   speed(1), direction(-1), moving(true) {}
+  
+  void create() {
+    qobj = gluNewQuadric();
+    gluQuadricNormals(qobj, GLU_SMOOTH);
+  }
   
   void moveBack() {z-=speed;};
   void moveForward() {z+=speed;};
@@ -367,109 +385,128 @@ public:
     }
     
     glPushMatrix();
-    
-    glTranslatef(x, y, z);
-    glRotatef(rotx, 1, 0, 0);
-    glRotatef(roty, 0, 1, 0);
-    glRotatef(rotz, 0, 0, 1);
-    
-    //top red part
-    glMaterialfv(GL_FRONT, GL_AMBIENT, ruby_ambient);
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, ruby_diffuse);
-    glMaterialfv(GL_FRONT, GL_SPECULAR, ruby_specular);
-    glMaterialfv(GL_FRONT, GL_SHININESS, ruby_shininess);
-    glColor3ub(255, 0, 0);
-    
-    glPushMatrix();
-    float angle = abs(((int(a*2)%90)-45));
-    float a2rad = MY_PI/180.0;
-    float move_up = (radius*sin(angle*a2rad))/sin(90*a2rad);
-    float move_back = move_up * 0.7;//(move_up/sin((90-angle)*a2rad))*sin(angle*a2rad);
-    glTranslatef(0, move_up, -move_back);
-    glRotatef(-angle, 1, 0, 0);
-    
-    drawHalfSphere(20, 20, radius);
-    glPopMatrix();
-    
-    //bottom white part
-    glMaterialfv(GL_FRONT, GL_AMBIENT, p_silv_ambient);
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, p_silv_diffuse);
-    glMaterialfv(GL_FRONT, GL_SPECULAR, p_silv_specular);
-    glMaterialfv(GL_FRONT, GL_SHININESS, p_silv_shininess);
-    glTranslatef(0, 0.0, 0);
-    glRotatef(180, 1, 0, 0);
-    glColor3ub(255, 255, 255);
-    
-    drawHalfSphere(20, 20, radius);
-    glRotatef(-180, 1, 0, 0);
-    
-    //black dot
-    glMaterialfv(GL_FRONT, GL_AMBIENT, rubber_ambient);
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, rubber_diffuse);
-    glMaterialfv(GL_FRONT, GL_SPECULAR, rubber_specular);
-    glMaterialfv(GL_FRONT, GL_SHININESS, rubber_shininess);
-    glTranslatef(0, 0.0, radius
-                 );
-    glRotatef(90, 1, 0, 0);
-    glColor3ub(0, 0, 0);
-    drawHalfSphere(20, 20, radius/5.0);
-    glRotatef(-90, 1, 0, 0);
-    
-    //black ring
-    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, BLACK);
-    glTranslatef(0, 0, -radius);
-    glRotatef(90, 1, 0, 0);
-    glColor3ub(0, 0, 0);
-    drawCircle(radius + 0.01,radius/10.0);
-    
+      glTranslatef(x, y, z);
+      glRotatef(rotx, 1, 0, 0);
+      glRotatef(roty, 0, 1, 0);
+      glRotatef(rotz, 0, 0, 1);
+      
+      //top red part
+      glMaterialfv(GL_FRONT, GL_AMBIENT, ruby_ambient);
+      glMaterialfv(GL_FRONT, GL_DIFFUSE, ruby_diffuse);
+      glMaterialfv(GL_FRONT, GL_SPECULAR, ruby_specular);
+      glMaterialfv(GL_FRONT, GL_SHININESS, ruby_shininess);
+      glColor3ub(255, 0, 0);
+      
+      glPushMatrix();
+        float angle = abs(((int(a*2)%90)-45));
+        float a2rad = MY_PI/180.0;
+        float move_up = (radius*sin(angle*a2rad))/sin(90*a2rad);
+        float move_back = move_up * 0.7;//(move_up/sin((90-angle)*a2rad))*sin(angle*a2rad);
+        glTranslatef(0, move_up, -move_back);
+        glRotatef(-angle, 1, 0, 0);
+        
+        drawHalfSphere(radius);
+      glPopMatrix();
+      
+      glPushMatrix();
+        //bottom white part
+        glMaterialfv(GL_FRONT, GL_AMBIENT, p_silv_ambient);
+        glMaterialfv(GL_FRONT, GL_DIFFUSE, p_silv_diffuse);
+        glMaterialfv(GL_FRONT, GL_SPECULAR, p_silv_specular);
+        glMaterialfv(GL_FRONT, GL_SHININESS, p_silv_shininess);
+        glTranslatef(0, 0.0, 0);
+        glRotatef(180, 1, 0, 0);
+        glColor3ub(255, 255, 255);
+        
+        drawHalfSphere(radius);
+        glRotatef(-180, 1, 0, 0);
+        
+        //black dot
+        glMaterialfv(GL_FRONT, GL_AMBIENT, rubber_ambient);
+        glMaterialfv(GL_FRONT, GL_DIFFUSE, rubber_diffuse);
+        glMaterialfv(GL_FRONT, GL_SPECULAR, rubber_specular);
+        glMaterialfv(GL_FRONT, GL_SHININESS, rubber_shininess);
+        glTranslatef(0, 0.0, radius);
+        glRotatef(90, 1, 0, 0);
+        glColor3ub(0, 0, 0);
+        drawHalfSphere(radius/5.0);
+        glRotatef(-90, 1, 0, 0);
+        
+        //black ring
+        glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, BLACK);
+        glTranslatef(0, 0, -radius);
+        glRotatef(90, 1, 0, 0);
+        glColor3ub(0, 0, 0);
+        drawCircle(radius + 0.01,radius/10.0);
+      glPopMatrix();
+      
+      //back hinge
+      glPushMatrix();
+        glTranslatef(-radius/10, .1, -radius);
+        glRotatef(90, 0, 1, 0);
+        gluCylinder(qobj, .1,.1, radius/5, 100, 100);
+      glPopMatrix();
     glPopMatrix();
   }
 };
 
-Environment area(8, 50);
+Environment area(8, 15);
 Camera camera;
 PokeBall balls[] = {
   PokeBall(1, 10, 6, 1),
   PokeBall(1.5, 10, 3, 4),
-  PokeBall(0.4, 10, 1, 7)
+  PokeBall(0.4, 10, 1, -5),
+  PokeBall(0.6, 10, 2, -6),
+  PokeBall(0.7, 10, 4, -5),
+  PokeBall(0.8, 10, 10, 0)
 };
 SwingSet playground(1,0,-1);
-GLUquadric* qobj;
 
 void init() {
-  qobj = gluNewQuadric();
-  gluQuadricNormals(qobj, GLU_SMOOTH);
   glEnable(GL_DEPTH_TEST);
+  
+  //set light 1
   glLightfv(GL_LIGHT0, GL_AMBIENT, WHITE);
   glLightfv(GL_LIGHT0, GL_DIFFUSE, WHITE);
   glLightfv(GL_LIGHT0, GL_SPECULAR, WHITE);
   
+  //set light 2
   glLightfv(GL_LIGHT1, GL_AMBIENT, RED);
   glLightfv(GL_LIGHT1, GL_DIFFUSE, RED);
   glLightfv(GL_LIGHT1, GL_SPECULAR, RED);
   
-  glMaterialfv(GL_FRONT, GL_SPECULAR, WHITE);
-  glMaterialf(GL_FRONT, GL_SHININESS, 30);
-  
   glEnable(GL_LIGHTING);
   glEnable(GL_LIGHT0);
   glEnable(GL_LIGHT1);
+  
+  //create objects
   area.create();
   playground.create();
+  for (int i = 0; i < sizeof balls / sizeof(PokeBall); i++) {
+    balls[i].create();
+  }
 }
 
 void display() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glLoadIdentity();
+  
+  //look at scene from the front
   gluLookAt(4, 2, 15,
             4, 4, -5,
             0, 1, 0);
+  
+  //draw the scene
   area.draw();
+  
+  //draw the pokeballs
   for (int i = 0; i < sizeof balls / sizeof(PokeBall); i++) {
     balls[i].update();
   }
   
+  //draw the playground
   playground.update();
+  
   glFlush();
   glutSwapBuffers();
 }
@@ -500,6 +537,7 @@ void special(int key, int, int) {
 
 void keyboardFunc (unsigned char key, int x, int y) {
   switch (key) {
+      
     case '1':
       area.toggleLight1();
       break;
@@ -565,7 +603,6 @@ void keyboardFunc (unsigned char key, int x, int y) {
     case ' ':
       balls[currentPokeBall].toggleMoving();
       break;
-      //toggle which ball to move
     case '`':
       currentPokeBall++;
       if (currentPokeBall >= sizeof balls / sizeof(PokeBall))
