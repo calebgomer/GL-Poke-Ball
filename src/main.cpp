@@ -466,9 +466,9 @@ void display() {
             4, 4, -5,
             0, 1, 0);
   area.draw();
-  //for (int i = 0; i < sizeof balls / sizeof(PokeBall); i++) {
-  //  balls[i].update();
-  //}
+  for (int i = 0; i < sizeof balls / sizeof(PokeBall); i++) {
+    balls[i].update();
+  }
   
   playground.update();
   glFlush();
