@@ -240,7 +240,7 @@ public:
   
   void update() {
     if (moving) {
-      rotSwing += direction *0.5;
+      rotSwing += direction *speed;
       if (rotSwing > 140) {
         rotSwing = 140; direction = -1;
       } else if (rotSwing < 50) {
@@ -706,7 +706,7 @@ void keyboardFunc (unsigned char key, int x, int y) {
     case 'l':
       playground.slowDown();
       break;
-    case '\n':
+    case '7':
       playground.toggleMoving();
       break;
 	case '-':
@@ -714,11 +714,13 @@ void keyboardFunc (unsigned char key, int x, int y) {
 		break;
 	case '=':
 		playground.rotateSNeg();
+		break;
 	case '9':
 		playground.rotateTirePos();
 		break;
 	case '0':
 		playground.rotateTireNeg();
+		break;
   }
 }
 /**
