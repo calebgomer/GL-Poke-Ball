@@ -509,12 +509,12 @@ void keyboardFunc (unsigned char key, int x, int y) {
       
       //pokeball maneuvering
     case 'w':
-      balls[0].moveUp();
       balls[currentPokeBall].manualMove();
       balls[currentPokeBall].moveUp();
       break;
     case 'a':
       balls[0].moveLeft();
+      balls[currentPokeBall].manualMove();
       balls[currentPokeBall].moveLeft();
       break;
     case 's':
@@ -522,6 +522,7 @@ void keyboardFunc (unsigned char key, int x, int y) {
       balls[currentPokeBall].moveDown();
       break;
     case 'd':
+      balls[currentPokeBall].manualMove();
       balls[currentPokeBall].moveRight();
       break;
     case 'q':
@@ -533,19 +534,18 @@ void keyboardFunc (unsigned char key, int x, int y) {
       balls[currentPokeBall].moveForward();
       break;
     case 'z':
-      balls[0].rotateYNeg();
+      balls[currentPokeBall].manualMove();
       balls[currentPokeBall].rotateYNeg();
       break;
     case 'x':
-      balls[0].manualMove();
+      balls[currentPokeBall].manualMove();
+      balls[currentPokeBall].rotateYPos();
       break;
     case 'c':
       balls[currentPokeBall].manualMove();
       balls[currentPokeBall].rotateXNeg();
       break;
     case 'v':
-      balls[0].manualMove();
-      balls[0].rotateXPos();
       balls[currentPokeBall].manualMove();
       balls[currentPokeBall].rotateXPos();
       break;
@@ -554,15 +554,18 @@ void keyboardFunc (unsigned char key, int x, int y) {
       balls[currentPokeBall].rotateZNeg();
       break;
     case 'b':
+      balls[currentPokeBall].manualMove();
       break;
     case 'r':
+      balls[currentPokeBall].speedUp();
       break;
     case 'f':
-      balls[0].slowDown();
       balls[currentPokeBall].slowDown();
       break;
     case ' ':
+      balls[currentPokeBall].toggleMoving();
       break;
+      //toggle which ball to move
     case '`':
       currentPokeBall++;
       if (currentPokeBall >= sizeof balls / sizeof(PokeBall))
