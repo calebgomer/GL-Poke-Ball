@@ -2,6 +2,8 @@
  * Erik Kremer and Caleb Gomer
  * Computer Graphics Project 2
  *
+ * Pokemon Playground
+ *
  * This project is hosted on github
  * https://github.com/calebgomer/GL-Poke-Ball
  ***********************************/
