@@ -197,14 +197,14 @@ class SwingSet{
 	GLUquadric* qobj;
   double rotx;
   double roty;
-  double rotz, rotSwing;
-  double speed;
+  double rotz, rotSwing, rotTire;
+  double speed, a;
   int direction;
   bool moving;
 public:
 	SwingSet(double x, double y, double z):
 	x(x), y(y), z(z), swingDirection(-1),
-  rotx(0), roty(0), rotz(0), rotSwing(0), speed(1), direction(-1), moving(true) {}
+  rotx(0), roty(0), rotz(0), rotSwing(90), rotTire(0), speed(1), direction(-1), moving(true) {}
   
   void create() {
     qobj = gluNewQuadric();
@@ -224,8 +224,11 @@ public:
   void rotateYNeg() {roty-=speed*5;};
   void rotateZPos() {rotz+=speed*5;};
   void rotateZNeg() {rotz-=speed*5;};
+
   void rotateSPos() {rotSwing+= speed*5;};
   void rotateSNeg() {rotSwing-= speed*5;};
+  void rotateTirePos(){rotTire+= speed*5;};
+  void rotateTireNeg(){rotTire-= speed*5;};
 
   void speedUp() {speed*=1.1;};
   void slowDown() {speed*=0.9;};
@@ -236,7 +239,14 @@ public:
   
   
   void update() {
-    
+    if (moving) {
+      rotSwing += direction *0.5;
+      if (rotSwing > 140) {
+        rotSwing = 140; direction = -1;
+      } else if (rotSwing < 50) {
+        rotSwing = 50; direction = 1;
+      }
+	}
     glPushMatrix();
     glTranslatef(x, y, z);
     glRotatef(rotx, 1, 0, 0);
@@ -315,6 +325,7 @@ public:
     
     glTranslatef(0,0,3);
     glRotatef(90,0,1,0);
+	glRotatef(rotTire, 1,0,0);
     glutSolidTorus(.25,1,16,16);
     glPopMatrix();
     
@@ -541,9 +552,9 @@ void display() {
             4, 4, -5,
             0, 1, 0);
   area.draw();
-  for (int i = 0; i < sizeof balls / sizeof(PokeBall); i++) {
-    balls[i].update();
-  }
+  //for (int i = 0; i < sizeof balls / sizeof(PokeBall); i++) {
+  //  balls[i].update();
+  //}
   
   playground.update();
   // printLeapInfo();
@@ -703,6 +714,11 @@ void keyboardFunc (unsigned char key, int x, int y) {
 		break;
 	case '=':
 		playground.rotateSNeg();
+	case '9':
+		playground.rotateTirePos();
+		break;
+	case '0':
+		playground.rotateTireNeg();
   }
 }
 /**
