@@ -15,7 +15,6 @@
 #else
 #include <GL/glut.h>
 #endif
- public:
 
 using namespace std;
 
