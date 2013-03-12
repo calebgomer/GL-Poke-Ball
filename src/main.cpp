@@ -572,7 +572,8 @@ void keyboardFunc (unsigned char key, int x, int y) {
       if (currentPokeBall >= sizeof balls / sizeof(PokeBall))
         currentPokeBall = 0;
       break;
-    //swingset maneuvering
+      
+      //swingset maneuvering
     case 'u':
       playground.manualMove();
       playground.moveUp();
@@ -630,18 +631,23 @@ void keyboardFunc (unsigned char key, int x, int y) {
     case '7':
       playground.toggleMoving();
       break;
-	case '-':
 		playground.rotateSPos();
 		break;
 	case '=':
 		playground.rotateSNeg();
-		break;
 	case '9':
-		playground.rotateTirePos();
-		break;
-	case '0':
-		playground.rotateTireNeg();
-		break;
+    case '-':
+      playground.rotateSPos();
+      break;
+    case '=':
+      playground.rotateSNeg();
+      break;
+    case '9':
+      playground.rotateTirePos();
+      break;
+    case '0':
+      playground.rotateTireNeg();
+      break;
   }
 }
  std::cout << "Initialized" << std::endl;
