@@ -498,6 +498,7 @@ void special(int key, int, int) {
   }
   glutPostRedisplay();
 }
+
 void keyboardFunc (unsigned char key, int x, int y) {
   switch (key) {
     case '1':
@@ -513,7 +514,6 @@ void keyboardFunc (unsigned char key, int x, int y) {
       balls[currentPokeBall].moveUp();
       break;
     case 'a':
-      balls[0].moveLeft();
       balls[currentPokeBall].manualMove();
       balls[currentPokeBall].moveLeft();
       break;
@@ -555,6 +555,7 @@ void keyboardFunc (unsigned char key, int x, int y) {
       break;
     case 'b':
       balls[currentPokeBall].manualMove();
+      balls[currentPokeBall].rotateZPos();
       break;
     case 'r':
       balls[currentPokeBall].speedUp();
