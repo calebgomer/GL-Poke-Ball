@@ -8,19 +8,11 @@
 
 #include <cmath>
 #include <stdlib.h>
-#include <stdio.h>
-#ifdef __APPLE_CC__
+#ifdef __APPLE__
 #include <GLUT/glut.h>
 #else
 #include <GL/glut.h>
 #endif
-#include <stdarg.h>
-#include <iostream>
-#include <sstream>
-#include <vector>
-#include <map>
-#include <utility>
-#include <string>
 //#include "Leap.h"
 /*
  //using namespace Leap;
