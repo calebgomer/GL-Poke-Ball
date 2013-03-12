@@ -197,15 +197,14 @@ class SwingSet{
 	GLUquadric* qobj;
   double rotx;
   double roty;
-  double rotz;
+  double rotz, rotSwing;
   double speed;
   int direction;
   bool moving;
 public:
 	SwingSet(double x, double y, double z):
 	x(x), y(y), z(z), swingDirection(-1),
-  rotx(0), roty(0), rotz(0),
-  speed(1), direction(-1), moving(true) {}
+  rotx(0), roty(0), rotz(0), rotSwing(0), speed(1), direction(-1), moving(true) {}
   
   void create() {
     qobj = gluNewQuadric();
@@ -225,7 +224,9 @@ public:
   void rotateYNeg() {roty-=speed*5;};
   void rotateZPos() {rotz+=speed*5;};
   void rotateZNeg() {rotz-=speed*5;};
-  
+  void rotateSPos() {rotSwing+= speed*5;};
+  void rotateSNeg() {rotSwing-= speed*5;};
+
   void speedUp() {speed*=1.1;};
   void slowDown() {speed*=0.9;};
   
@@ -299,9 +300,8 @@ public:
     
     glPushMatrix();
     glTranslatef(3,4.33,3.5);
-    glRotatef(90,1,0,0);
+    glRotatef(rotSwing,1,0,0);
     gluCylinder(qobj, .1,.1, 2, 100, 100);
-    glPopMatrix();
     
     //tire
     GLfloat ambient3[] = {0.020000, 0.020000, 0.020000, 1.000000};
@@ -313,10 +313,9 @@ public:
     glMaterialfv(GL_FRONT, GL_SPECULAR, specular3);
     glMaterialfv(GL_FRONT, GL_SHININESS, shininess3);
     
-    glPushMatrix();
-    glTranslatef(3,1.33,3.5);
+    glTranslatef(0,0,3);
     glRotatef(90,0,1,0);
-    glutSolidTorus(.5,.75,16,16);
+    glutSolidTorus(.25,1,16,16);
     glPopMatrix();
     
     glPopMatrix();
@@ -699,6 +698,11 @@ void keyboardFunc (unsigned char key, int x, int y) {
     case '\n':
       playground.toggleMoving();
       break;
+	case '-':
+		playground.rotateSPos();
+		break;
+	case '=':
+		playground.rotateSNeg();
   }
 }
 /**
@@ -746,7 +750,6 @@ int main(int argc, char** argv) {
   //loop it up
   glutMainLoop();
 }
-
 
 //#ifdef __APPLE__
 //#include <GLUT/glut.h>
